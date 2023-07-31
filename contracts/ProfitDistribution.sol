@@ -1,46 +1,66 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.7.0;
 
-contract ProfitDistributionContract {
-    struct Recipient {
-        address payable recipientAddress;
-        uint256 distributionPercentage;
+// etherを受け取り、送金するコントラクト
+contract Pay {
+    // payable修飾子のついたaddressはetherを受け取ることができる
+    address payable public owner;
+
+    // payable修飾子のついたconstructorはデプロイ時にetherを受け取ることができる
+    // msg.senderは関数を呼び出したアドレス（この場合はデプロイしたアドレス）
+    constructor() payable {
+        owner = payable(msg.sender);
     }
 
-    address payable public addressA;  // 分配先のアドレスA
-    Recipient[] public recipients;  // 分配先アドレスと割合のリスト
+    // Payコントラクトアドレスにetherを送金する関数
+    function deposit() payable public {}
 
-    constructor(address payable _addressA, address payable[] memory _recipientAddresses, uint256[] memory _distributionPercentages) {
-        addressA = _addressA;
-
-        // アドレスAをリストに追加 (30%の配分)
-        recipients.push(Recipient(addressA, 30));
-
-        // 残りのアドレスと割合をリストに追加 (70%の配分)
-        require(_recipientAddresses.length == _distributionPercentages.length, "Invalid input");
-
-        for (uint256 i = 0; i < _recipientAddresses.length; i++) {
-            recipients.push(Recipient(_recipientAddresses[i], _distributionPercentages[i]));
-        }
+    // Payコントラクトアドレスのether残高を返す関数
+    // requireでコントラクトデプロイ者のみ実行可能となっている
+    function getBalance() public view returns (uint256) {
+        require(owner == msg.sender);
+        return address(this).balance;
     }
 
+    // Payコントラクトアドレスから_toアドレスに_amount分のetherを送金する関数
+    function withdraw(address payable _to, uint _amount) public {
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Failed to send Ether");
+    }
+}
+
+
+// Payコントラクトからetherを受け取るテスト用のコントラクト
+contract ReceiveEther {
+    // etherを受け取るには"receive() external payable {}"または"fallback() external payable {}"のどちらかが必要
+
+    // receive関数はmsg.dataが空である場合に呼び出される
+    receive() external payable {}
+
+    // fallback関数はmsg.dataが空でない場合、存在しない関数が呼び出された場合、receive()が存在しない場合に呼び出される
+    fallback() external payable {}
+
+    // ReceiveEtherコントラクトアドレスに入っている残高を返す関数
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
+    }
+}
+
+contract ForwardEther {
+
+    // 宛先アドレス
+    address payable[] public destinationAddresses;
+
+    constructor(address payable[] memory _destinationAddresses) {
+        destinationAddresses = _destinationAddresses;
+    }
+
+    // コントラクトに送金されたとき、その送金を自動的にdestinationAddressに転送します。
     receive() external payable {
-        distributeFunds();  // コントラクトに送金された際に分配処理を実行する
-    }
-
-    function distributeFunds() internal {
-        uint256 contractBalance = address(this).balance;  // コントラクトが保持する残高を取得
-        uint256 totalDistributionPercentage = 0;
-
-        // 全体の割合の合計を計算
-        for (uint256 i = 0; i < recipients.length; i++) {
-            totalDistributionPercentage += recipients[i].distributionPercentage;
-        }
-
-        // 各アドレスに対する分配処理を実行
-        for (uint256 i = 0; i < recipients.length; i++) {
-            uint256 amountToRecipient = (contractBalance * recipients[i].distributionPercentage) / totalDistributionPercentage;
-            recipients[i].recipientAddress.transfer(amountToRecipient);
-        }
+        require(msg.value > 0, "No ethers transferred");
+        (bool success, ) = destinationAddresses[0].call{value: msg.value * 3 / 10}("");
+        require(success, "Transfer failed");
+        (bool successB, ) = destinationAddresses[1].call{value: msg.value * 7 / 10}("");
+        require(successB, "Transfer failed");
     }
 }
