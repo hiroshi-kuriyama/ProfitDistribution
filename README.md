@@ -27,6 +27,16 @@ PolygonのテストネットであるMumbaiにデプロイしたコントラク�
 ## Aragonのproposalでの設定の仕方
 
 
+https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/edfdc954-a244-4b15-9a1d-6937f6752eab
+
+
+https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/7a4adf85-1c55-479a-87fa-3b25bb781982
+
+デプロイされた子スマコンに対して送金すると正しく分配されていることがわかる。
+例: [0xebeEAE5f7e8bf9C31c86Ecfe5d8312Bf72636C55](https://mumbai.polygonscan.com/tx/0x4cc726240863194d33a39017a80c6340c16c0e2aefd4d6e0553abf4bf670a5e3)
+
+
+
 # 今後の課題
 ## ERC-20の自動分配
 Aragonで作成したDAOのトークンはERC-20という種類であることが実装を難しくしています。
