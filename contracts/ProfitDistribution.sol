@@ -1,4 +1,7 @@
-contract ForwardEther {
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.6;
+
+contract Distribute {
 
     // 宛先アドレスと分配比率
     struct Share {
