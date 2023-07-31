@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-contract Distribute {
+contract ProfitDistribution {
 
     // 宛先アドレスと分配比率
     struct Share {
@@ -56,5 +56,20 @@ contract Distribute {
         }
 
         return (destinationAddresses, percentages);
+    }
+}
+
+contract DeployProfitDistribution {
+    address[] public deployedContracts; // デプロイしたコントラクトアドレスを（過去分を含めてすべて）記録するための配列
+    event ContractDeployed(address contractAddress); // Add event for logging
+    function deployProfitDistribution(address payable _treasuryAddress, address payable[] memory _destinationAddresses, uint256[] memory _percentages) public returns (ProfitDistribution) {
+        ProfitDistribution pd = new ProfitDistribution(_treasuryAddress, _destinationAddresses, _percentages);
+        address newContractAddress = address(pd);
+        deployedContracts.push(newContractAddress);
+        emit ContractDeployed(newContractAddress); // Emit event with new contract address
+        return pd;
+    }
+    function getDeployedContracts() public view returns (address[] memory) {
+        return deployedContracts;
     }
 }
