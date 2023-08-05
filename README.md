@@ -6,18 +6,29 @@ code for a smart contract. Distribute profit in DAO.
 AiberryDAOのトークンエコノミーを成立させるためのスマートコントラクトを作成しています。収益を自動的に分配するスマートコントラクトです。[コントラクトのソースコードはこちら(ProfitDistribution.sol)。](/contracts/ProfitDistribution.sol)
 
 ## ソースコードの説明
-- ProfitDistribution（ここでは子スマコンと呼びます）
+- ProfitDistributor
   - 入金されたネイティブトークン（EtherやMATICなど）の30%をトレジャリーに送金すると同時に、残りの70%を任意の数のアドレス宛に任意の割合で分配します。入金を検知すると自動的に分配を執行します。
-- DeployProfitDistribution
-  - 親スマコンです。子スマコン(ProfitDistribution)をデプロイするスマコンなので親スマコンと呼んでいます。
-  - トレジャリーのアドレス、任意の分配先アドレス、任意の分配比率を設定して子スマコンをデプロイします。 
+- TokenDistributor
+  - ERC-20トークンをProfitDistributorと同じアドレス（トレジャリーを除く）に分配します。
+  - ERC-20はトークンの入金をトリガーにした処理は実装できないので、TokenDistributorへのトークン送金とTokenDistributorからのトークン分配の2手間かかります。
+  - 更にはTokenDistributorへのトークン入金者が事前に送金をapproveする必要もあります。（次の実装で解決したい。）
+- ContractDeployer
+  - 親スマコンです。子スマコン(ProfitDistributorとTokenDistributor)をデプロイするスマコンなので親スマコンと呼んでいます。
+  - 親スマコンのデプロイ時にトレジャリーアドレスとトークンアドレスを設定します。つまりこの2つのアドレスはそれ以降の変更は不可能です。
+  - 任意の分配先アドレス、任意の分配比率を設定して子スマコンをデプロイすると、ProfitDistributorとTokenDistributorのコントラクトアドレスが新しく発行されます。 
 
 ## 使い方
-1. Aragonのproposal機能を使ってDeployProfitDistributionのdeployProfitDistribution()関数に分配先アドレス等を設定してDAO内での投票にかけます。
+1. Aragonのproposal機能を使ってContractDeployerのdeployDistributors()関数に分配先アドレス等を設定してDAO内での投票にかけます。
 2. DAOトークン保有者は分配先アドレスやその比率を確認し、問題ないと判断すればそれぞれがYESの投票をします。
-3. 投票によってproposalが可決されれば、deployProfitDistribution()関数が実行され、ProfitDistributionがデプロイされます。
-4. クライアントもしくはAiberry㈱が収益をネイティブトークンでProfitDistributionのコントラクト宛に送金します。
-5. このコントラクトは1での設定通りに自動的にネイティブトークンを分配します。
+3. 投票によってproposalが可決されれば、deployDistributors()関数とTokenDistributor()関数が実行され、ProfitDistributorとTokenDistributorのコントラクトがデプロイされます。
+4. Aiberry㈱が収益をネイティブトークン（EtherやMATCI）でProfitDistributorのコントラクト宛に送金します。すると1での設定通りに自動的にネイティブトークンを分配します。
+5. 以下のproposalを投票にかけます。
+   a. AiberryDAOがTokenDistributorのコントラクト宛にERC-20（今回はAIB）を送金もしくはミントする
+   b. AiberryDAOがaのミント額と同額のapproveを行う（IERC20のapprove関数の実行）
+6. 投票によってproposalが可決されれば、ERC-20がTokenDistributorのコントラクト宛に送金されます。
+7. TokenDistributorのdistributeTokens()関数を実行すると1での設定通りに自動的にERC20トークンを分配されます。（distributeTokens()は投票を経ずに誰でも実行可能）
+
+# 以下、要修正
 
 ## テストネットでの動作確認
 PolygonのテストネットであるMumbaiにデプロイしたコントラクトは[0x37FcCE4Ea6b008117f5C0Cf7A47491C7A4b243D5](https://mumbai.polygonscan.com/address/0x37FcCE4Ea6b008117f5C0Cf7A47491C7A4b243D5)です。
