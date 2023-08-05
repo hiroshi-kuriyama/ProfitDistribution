@@ -2,7 +2,7 @@
 pragma solidity ^0.7.6;
 
 // Importing OpenZeppelin's ERC20 interface version 3.4.2
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.2/contracts/token/ERC20/IERC20.sol";
+import "./IERC20.sol";
 
 contract ProfitDistributor {
 
@@ -62,6 +62,7 @@ contract ProfitDistributor {
     }
 }
 
+
 contract TokenDistributor {
 
     struct Share {
@@ -82,7 +83,8 @@ contract TokenDistributor {
         }
     }
 
-    function distributeTokens(uint256 amount) public {
+    function distributeTokens() public {
+        uint256 amount = token.balanceOf(address(this));
         require(amount > 0, "No tokens to distribute");
 
         uint256 totalPercentage = 0;
@@ -90,7 +92,7 @@ contract TokenDistributor {
             totalPercentage += shares[i].percentage;
         }
         for (uint256 i = 0; i < shares.length; i++) {
-            require(token.transferFrom(msg.sender, shares[i].destinationAddress, amount * shares[i].percentage / totalPercentage), "Transfer in loop failed");
+            require(token.transfer(shares[i].destinationAddress, amount * shares[i].percentage / totalPercentage), "Transfer in loop failed");
         }
     }
 
@@ -108,8 +110,6 @@ contract TokenDistributor {
 }
 
 
-
-
 contract ContractDeployer {
     struct DeployedContract {
         address profitDistributor;
@@ -117,7 +117,7 @@ contract ContractDeployer {
     }
 
     DeployedContract[] public deployedContracts;
-    address payable treasuryAddress;
+    address payable public treasuryAddress;
     IERC20 public token;
 
     event ContractDeployed(address profitDistributor, address tokenDistributor); 
