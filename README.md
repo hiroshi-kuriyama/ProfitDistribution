@@ -33,16 +33,21 @@ PolygonのテストネットであるMumbaiにデプロイしたコントラク�
 
 ## Aragonのproposalでの設定の仕方
 
+### 初回はContractDeployerのコントラクトアドレスへの紐づけが必要
 
-https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/edfdc954-a244-4b15-9a1d-6937f6752eab
+https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/4dcc9cb2-8370-4798-9806-a84a5ef387e8
 
-
-https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/7a4adf85-1c55-479a-87fa-3b25bb781982
-
-デプロイされた子スマコンに対して送金すると正しく分配されていることがわかる。
-例: [0xebeEAE5f7e8bf9C31c86Ecfe5d8312Bf72636C55](https://mumbai.polygonscan.com/tx/0x4cc726240863194d33a39017a80c6340c16c0e2aefd4d6e0553abf4bf670a5e3)
+### 「使い方」の1の実施方法
+> ContractDeployerのdeployDistributors()関数に分配先アドレス等を設定してDAO内での投票にかけます。
 
 
+https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/5b079272-01cd-4329-9d7b-6427fb17ac20
+
+### 「使い方」の3の結果の確認方法
+ProfitDistributorとTokenDistributorのコントラクトアドレスを確認できます。
+
+
+https://github.com/hiroshi-kuriyama/ProfitDistribution/assets/29877317/5aa1cd7c-32db-416a-8778-ad13cff3196a
 
 # 今後の課題
 ## セキュリティ
